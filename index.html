@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Clinique Lampfall</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:#f0fff4;
+}
+
+/* HEADER */
+
+header{
+background:#16a34a;
+color:white;
+padding:20px;
+text-align:center;
+font-size:28px;
+}
+
+/* LOGIN */
+
+.container{
+max-width:500px;
+margin:30px auto;
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+input, select, button{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button{
+background:#16a34a;
+color:white;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#15803d;
+}
+
+.section{
+display:none;
+}
+
+.card{
+background:#dcfce7;
+padding:10px;
+margin:5px 0;
+border-radius:8px;
+}
+
+</style>
+</head>
+<body>
+
+<header>🏥 Clinique Lampfall</header>
+
+<!-- LOGIN -->
+
+<div class="container" id="loginPage">
+
+<img src="https://images.unsplash.com/photo-1584982751601-97dcc096659c" 
+     style="width:100%;border-radius:12px;margin-bottom:15px;">
+
+<h3>Connexion</h3>
+
+<input type="text" id="loginInput" placeholder="Nom patient ou email professionnel">
+
+<select id="role">
+<option value="patient">Patient</option>
+<option value="medecin">Médecin</option>
+<option value="labo">Laborantin</option>
+<option value="secretaire">Secrétaire</option>
+<option value="tresorier">Trésorier</option>
+</select>
+
+<button onclick="login()">Connexion</button>
+
+<h3>Inscription Patient</h3>
+
+<input type="text" id="registerName" placeholder="Nom patient">
+
+<button onclick="register()">S'inscrire</button>
+
+</div>
+
+<!-- PATIENT -->
+
+
+<div class="container section" id="patientPage">
+
+<img src="https://images.unsplash.com/photo-1588776814546-8249e2f3147b" 
+     style="width:100%;border-radius:12px;margin-bottom:15px;">
+
+<h2>Espace Patient</h2>
+
+
+
+<h3> <img src="https://images.unsplash.com/photo-1606813903364-fbd66c39e2a1" 
+       style="width:30px;vertical-align:middle;margin-right:5px;"> Prendre rendez-vous</h3>
+
+<select id="rdvType">
+<option>Consultation</option>
+<option>Analyse sanguine</option>
+</select>
+
+<input type="date" id="rdvDate">
+
+<button onclick="addRDV()">Valider RDV</button>
+
+<h3><img src="https://images.unsplash.com/photo-1588776814564-832c3d4047a1" 
+       style="width:30px;vertical-align:middle;margin-right:5px;"> Résultats</h3>
+<div id="patientResults"></div>
+
+<h3>Diagnostics</h3>
+<div id="patientDiagnostics"></div>
+
+</div>
+
+<!-- MEDECIN -->
+
+<div class="container section" id="medecinPage">
+
+<img src="https://images.unsplash.com/photo-1588776814564-832c3d4047a1" 
+     style="width:100%;border-radius:12px;margin-bottom:15px;">
+
+<h2>Espace Médecin</h2>
+
+<h3><img src="https://images.unsplash.com/photo-1588776814564-832c3d4047a1" 
+     style="width:100%;border-radius:12px;margin-bottom:15px;"> Notifications</h3>
+<div id="medNotif"></div>
+
+<h3>Ajouter Diagnostic</h3>
+
+<input type="text" id="diagPatient" placeholder="Nom patient">
+
+<input type="text" id="diagText" placeholder="Diagnostic">
+
+<button onclick="addDiagnostic()">Ajouter</button>
+
+<h3>Liste Patients</h3>
+<div id="patientList"></div>
+
+</div>
+
+<!-- LABORANTIN -->
+
+<div class="container section" id="laboPage">
+
+<h2>Espace Laboratoire</h2>
+
+<input type="text" id="labPatient" placeholder="Nom patient">
+
+<input type="text" id="labResult" placeholder="Résultat analyse">
+
+<button onclick="addResult()">Ajouter résultat</button>
+
+</div>
+
+<!-- SECRETAIRE -->
+
+<div class="container section" id="secretairePage">
+
+<h2>Espace Secrétaire</h2>
+
+<input type="text" id="newPatient" placeholder="Nom patient">
+
+<button onclick="addPatient()">Ajouter patient</button>
+
+<h3>Rendez-vous</h3>
+
+<div id="rdvList"></div>
+
+</div>
+
+<!-- TRESORIER -->
+
+<div class="container section" id="tresorierPage">
+
+<h2>Espace Trésorier</h2>
+
+<input type="text" id="payPatient" placeholder="Nom patient">
+
+<input type="number" id="payAmount" placeholder="Montant">
+
+<button onclick="addPayment()">Ajouter paiement</button>
+
+<h3>Paiements</h3>
+
+<div id="paymentList"></div>
+
+</div>
+
+<script>
+
+/* DATABASE */
+
+let patients=JSON.parse(localStorage.getItem("patients"))||[];
+let rdv=JSON.parse(localStorage.getItem("rdv"))||[];
+let results=JSON.parse(localStorage.getItem("results"))||[];
+let diagnostics=JSON.parse(localStorage.getItem("diagnostics"))||[];
+let notifications=JSON.parse(localStorage.getItem("notifications"))||[];
+let payments=JSON.parse(localStorage.getItem("payments"))||[];
+
+let currentUser="";
+
+/* REGISTER */
+
+function register(){
+
+let name=document.getElementById("registerName").value;
+
+patients.push(name);
+
+localStorage.setItem("patients",JSON.stringify(patients));
+
+alert("Inscription réussie");
+
+}
+
+/* LOGIN */
+
+function login(){
+
+let role=document.getElementById("role").value;
+let input=document.getElementById("loginInput").value;
+
+if(role!="patient" && !input.includes("@cliniquelampfall.sn")){
+alert("Email professionnel requis");
+return;
+}
+
+currentUser=input;
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById(role+"Page").style.display="block";
+
+if(role=="patient")showPatientData();
+if(role=="medecin")showMedecin();
+if(role=="secretaire")showRDV();
+if(role=="tresorier")showPayments();
+
+}
+
+/* PATIENT */
+
+function addRDV(){
+
+let type=document.getElementById("rdvType").value;
+let date=document.getElementById("rdvDate").value;
+
+rdv.push({patient:currentUser,type,date});
+
+localStorage.setItem("rdv",JSON.stringify(rdv));
+
+alert("RDV enregistré");
+
+}
+
+/* LAB */
+
+function addResult(){
+
+let patient=document.getElementById("labPatient").value;
+let result=document.getElementById("labResult").value;
+
+results.push({patient,result});
+
+notifications.push("Analyse disponible pour "+patient);
+
+localStorage.setItem("results",JSON.stringify(results));
+localStorage.setItem("notifications",JSON.stringify(notifications));
+
+alert("Résultat ajouté");
+
+}
+
+/* MEDECIN */
+
+function addDiagnostic(){
+
+let patient=document.getElementById("diagPatient").value;
+let diag=document.getElementById("diagText").value;
+
+diagnostics.push({patient,diag});
+
+localStorage.setItem("diagnostics",JSON.stringify(diagnostics));
+
+alert("Diagnostic ajouté");
+
+}
+
+function showMedecin(){
+
+let div=document.getElementById("medNotif");
+
+notifications.forEach(n=>{
+
+let d=document.createElement("div");
+d.className="card";
+d.innerText=n;
+
+div.appendChild(d);
+
+});
+
+let list=document.getElementById("patientList");
+
+patients.forEach(p=>{
+
+let d=document.createElement("div");
+d.className="card";
+d.innerText=p;
+
+list.appendChild(d);
+
+});
+
+}
+
+/* PATIENT DATA */
+
+function showPatientData(){
+
+let rDiv=document.getElementById("patientResults");
+let dDiv=document.getElementById("patientDiagnostics");
+
+results.filter(r=>r.patient==currentUser)
+.forEach(r=>{
+let d=document.createElement("div");
+d.className="card";
+d.innerText=r.result;
+rDiv.appendChild(d);
+});
+
+diagnostics.filter(d=>d.patient==currentUser)
+.forEach(d=>{
+let div=document.createElement("div");
+div.className="card";
+div.innerText=d.diag;
+dDiv.appendChild(div);
+});
+
+}
+
+/* SECRETAIRE */
+
+function addPatient(){
+
+let name=document.getElementById("newPatient").value;
+
+patients.push(name);
+
+localStorage.setItem("patients",JSON.stringify(patients));
+
+}
+
+function showRDV(){
+
+let div=document.getElementById("rdvList");
+
+rdv.forEach(r=>{
+let d=document.createElement("div");
+d.className="card";
+d.innerText=r.patient+" - "+r.type+" - "+r.date;
+div.appendChild(d);
+});
+
+}
+
+/* TRESORIER */
+
+function addPayment(){
+
+let patient=document.getElementById("payPatient").value;
+let amount=document.getElementById("payAmount").value;
+
+payments.push({patient,amount});
+
+localStorage.setItem("payments",JSON.stringify(payments));
+
+showPayments();
+
+}
+
+function showPayments(){
+
+let div=document.getElementById("paymentList");
+
+payments.forEach(p=>{
+let d=document.createElement("div");
+d.className="card";
+d.innerText=p.patient+" - "+p.amount+" FCFA";
+div.appendChild(d);
+});
+
+}
+
+</script>
+
+</body>
+</html>
